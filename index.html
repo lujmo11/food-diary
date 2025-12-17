@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Diary</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Firebase SDKs (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Templates</h2>
+            <div id="template-list" class="template-list">
+                <!-- Templates will be added here -->
+            </div>
+            <div class="sidebar-controls">
+                <p class="hint">Create an entry and click "Save as Template" to add here.</p>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <h1>Food Diary</h1>
+                <div class="auth-controls">
+                    <div id="user-info" class="hidden" style="display: flex; align-items: center; gap: 10px;">
+                        <img id="user-avatar" src="" alt="User" style="width: 32px; height: 32px; border-radius: 50%;">
+                        <span id="user-name" style="font-size: 0.9rem; font-weight: 500;"></span>
+                        <button id="logout-btn" class="btn outline" style="font-size: 0.8rem; padding: 4px 8px;">Logout</button>
+                        <button id="export-btn" class="btn secondary" style="font-size: 0.8rem; padding: 4px 8px;" title="Download Backup">⬇</button>
+                    </div>
+                    <button id="login-btn" class="btn primary">Login with Google</button>
+                </div>
+            </header>
+
+            <section class="entry-form-section">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="single">Single Item</button>
+                    <button class="tab-btn" data-tab="meal">Create Meal</button>
+                    <button class="tab-btn" data-tab="stomach">Stomach Diary</button>
+                </div>
+
+                <!-- Single Item Form -->
+                <form id="entry-form" class="tab-content active">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="entry-date">Date</label>
+                            <input type="date" id="entry-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="entry-time">Time</label>
+                            <input type="time" id="entry-time">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="food-name">Food Item</label>
+                        <input type="text" id="food-name" placeholder="e.g., Oatmeal with berries">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="calories">Calories</label>
+                            <input type="number" id="calories" placeholder="e.g., 350">
+                        </div>
+                        <div class="form-group">
+                            <label for="meal-type">Meal Type</label>
+                            <select id="meal-type">
+                                <option value="Breakfast">Breakfast</option>
+                                <option value="Lunch">Lunch</option>
+                                <option value="Dinner">Dinner</option>
+                                <option value="Snack">Snack</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="entry-image">Add Image</label>
+                        <input type="file" id="entry-image" accept="image/*">
+                        <img id="image-preview" class="hidden" style="max-width: 100%; margin-top: 10px; border-radius: 4px; display: none;">
+                    </div>
+                    <div class="form-group">
+                        <label for="entry-notes">Notes</label>
+                        <textarea id="entry-notes" placeholder="Add any notes about this item..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn primary" id="submit-entry-btn">Add Entry</button>
+                        <button type="button" id="save-template-btn" class="btn outline">Save as Template</button>
+                        <button type="button" id="cancel-edit-btn" class="btn outline hidden">Cancel Edit</button>
+                    </div>
+                </form>
+
+                <!-- Meal Builder Form -->
+                <div id="meal-builder" class="tab-content">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="meal-date">Date</label>
+                            <input type="date" id="meal-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="meal-time">Time</label>
+                            <input type="time" id="meal-time">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="meal-name">Meal Name</label>
+                        <input type="text" id="meal-name" placeholder="e.g., Full English Breakfast">
+                    </div>
+                    <div class="form-group">
+                        <label for="meal-type-composite">Meal Type</label>
+                        <select id="meal-type-composite">
+                            <option value="Breakfast">Breakfast</option>
+                            <option value="Lunch">Lunch</option>
+                            <option value="Dinner">Dinner</option>
+                            <option value="Snack">Snack</option>
+                        </select>
+                    </div>
+
+                    <div class="sub-item-form">
+                        <h4>Add Items to Meal</h4>
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 2;">
+                                <input type="text" id="sub-item-name" placeholder="Item name (e.g. Egg)">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <input type="number" id="sub-item-calories" placeholder="Cals">
+                            </div>
+                            <button type="button" id="add-sub-item-btn" class="btn secondary">Add</button>
+                        </div>
+                    </div>
+
+                    <div class="meal-items-list" id="meal-items-list">
+                        <!-- Added items will appear here -->
+                        <p class="empty-msg">No items added yet.</p>
+                    </div>
+
+                    <div class="meal-total">
+                        <strong>Total Calories: <span id="meal-total-calories">0</span></strong>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="meal-notes">Notes</label>
+                        <textarea id="meal-notes" placeholder="Add any notes about this meal..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="add-meal-btn" class="btn primary">Add Meal to Diary</button>
+                        <button type="button" id="save-meal-template-btn" class="btn outline">Save Meal as Template</button>
+                        <button type="button" id="cancel-meal-edit-btn" class="btn outline hidden">Cancel Edit</button>
+                    </div>
+                </div>
+
+                <!-- Stomach Diary Form -->
+                <form id="stomach-form" class="tab-content">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="stomach-date">Date</label>
+                            <input type="date" id="stomach-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="stomach-time">Time</label>
+                            <input type="time" id="stomach-time">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="stomach-status">Stomach Status</label>
+                        <select id="stomach-status">
+                            <option value="Normal">Normal</option>
+                            <option value="Bloated">Bloated</option>
+                            <option value="Hard">Hard</option>
+                            <option value="Lingering taste">Lingering taste</option>
+                            <option value="Gas">Gas</option>
+                            <option value="Custom">Custom...</option>
+                        </select>
+                    </div>
+
+                    <div id="taste-description-group" class="form-group hidden">
+                        <label for="taste-description">Describe Taste</label>
+                        <input type="text" id="taste-description" placeholder="e.g., Metallic, Acidic">
+                    </div>
+
+                    <div id="custom-status-group" class="form-group hidden">
+                        <label for="custom-status-input">New Status Name</label>
+                        <input type="text" id="custom-status-input" placeholder="Enter new status">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stomach-notes">Notes</label>
+                        <textarea id="stomach-notes" placeholder="Add any notes about your stomach status..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn primary" id="submit-stomach-btn">Add Entry</button>
+                        <button type="button" id="cancel-stomach-edit-btn" class="btn outline hidden">Cancel Edit</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="diary-log">
+                <h2>All Entries</h2>
+                <div class="diary-controls">
+                    <button id="expand-all-btn" class="btn secondary">Expand All</button>
+                    <button id="collapse-all-btn" class="btn secondary">Collapse All</button>
+                </div>
+                <div id="diary-list" class="diary-list">
+                    <!-- Entries will be added here grouped by day -->
+                </div>
+                <div class="summary">
+                    <strong>Total Calories: <span id="total-calories">0</span></strong>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
