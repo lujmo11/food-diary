@@ -34,12 +34,45 @@ body {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    transition: transform 0.3s ease;
+    z-index: 1000; /* Ensure it's above everything on mobile */
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
 }
 
 .sidebar h2 {
     font-size: 1.2rem;
-    margin-bottom: 15px;
+    margin-bottom: 0;
     color: #555;
+}
+
+.sidebar-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 900; /* Below sidebar when open */
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.close-sidebar-btn {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
 }
 
 .template-list {
@@ -417,7 +450,61 @@ input:focus, select:focus, textarea:focus {
     display: none !important;
 }
 
-.stomach-entry {
-    background-color: #f8f9fa;
-    border-left: 4px solid #888;
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        transform: translateX(-100%);
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .sidebar-toggle {
+        display: block;
+    }
+
+    .close-sidebar-btn {
+        display: block;
+    }
+
+    .main-content {
+        padding: 20px;
+        padding-top: 60px; /* Space for toggle button */
+    }
+
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .auth-controls {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .tabs {
+        overflow-x: auto;
+        padding-bottom: 5px;
+    }
+
+    .tab-btn {
+        white-space: nowrap;
+    }
+    
+    #user-info {
+        flex-wrap: wrap;
+    }
 }

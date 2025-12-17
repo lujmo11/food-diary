@@ -46,6 +46,11 @@ const templateList = document.getElementById('template-list');
 const diaryList = document.getElementById('diary-list');
 const totalCaloriesSpan = document.getElementById('total-calories');
 
+// Sidebar Elements
+const sidebar = document.getElementById('sidebar');
+const sidebarToggleBtn = document.getElementById('sidebar-toggle');
+const closeSidebarBtn = document.getElementById('close-sidebar');
+
 // Auth Elements
 const loginBtn = document.getElementById('login-btn');
 const logoutBtn = document.getElementById('logout-btn');
@@ -291,6 +296,28 @@ cancelMealEditBtn.addEventListener('click', handleCancelEdit);
 cancelStomachEditBtn.addEventListener('click', handleCancelEdit);
 const importBtn = document.getElementById('import-btn');
 if(importBtn) importBtn.addEventListener('click', () => importFileInput.click());
+
+// Sidebar Toggle Listeners
+if (sidebarToggleBtn) {
+    sidebarToggleBtn.addEventListener('click', () => {
+        sidebar.classList.add('active');
+    });
+}
+
+if (closeSidebarBtn) {
+    closeSidebarBtn.addEventListener('click', () => {
+        sidebar.classList.remove('active');
+    });
+}
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+        if (!sidebar.contains(e.target) && !sidebarToggleBtn.contains(e.target)) {
+            sidebar.classList.remove('active');
+        }
+    }
+});
 
 // Tab Switching
 tabBtns.forEach(btn => {

@@ -12,8 +12,12 @@
 </head>
 <body>
     <div class="container">
-        <aside class="sidebar">
-            <h2>Templates</h2>
+        <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle Sidebar">☰</button>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Templates</h2>
+                <button id="close-sidebar" class="close-sidebar-btn">&times;</button>
+            </div>
             <div id="template-list" class="template-list">
                 <!-- Templates will be added here -->
             </div>
