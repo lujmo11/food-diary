@@ -53,6 +53,8 @@ const userInfoDiv = document.getElementById('user-info');
 const userAvatarImg = document.getElementById('user-avatar');
 const userNameSpan = document.getElementById('user-name');
 const exportBtn = document.getElementById('export-btn');
+const importBackupBtn = document.getElementById('import-backup-btn');
+const importBackupFileInput = document.getElementById('import-backup-file');
 
 const expandAllBtn = document.getElementById('expand-all-btn');
 const collapseAllBtn = document.getElementById('collapse-all-btn');
@@ -182,6 +184,79 @@ function clearData() {
     updateSummary();
 }
 
+// Import Backup from JSON File
+function handleImportBackup(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!currentUser) {
+        alert("Please login before importing data.");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            
+            if (!Array.isArray(importedData.entries) || !Array.isArray(importedData.templates)) {
+                alert('Invalid backup file format.');
+                return;
+            }
+
+            const confirmed = confirm(`This will import ${importedData.entries.length} entries and ${importedData.templates.length} templates. Continue?`);
+            if (!confirmed) {
+                importBackupFileInput.value = '';
+                return;
+            }
+
+            // Show progress
+            importBackupBtn.disabled = true;
+            importBackupBtn.textContent = '⏳ Importing...';
+
+            const userDocRef = db.collection('users').doc(currentUser.uid);
+            let uploadedEntries = 0;
+            let uploadedTemplates = 0;
+
+            // Upload Entries
+            for (const entry of importedData.entries) {
+                const { id, ...entryData } = entry; // Remove old local ID
+                try {
+                    await userDocRef.collection('entries').add(entryData);
+                    uploadedEntries++;
+                } catch (error) {
+                    console.error("Error uploading entry:", error);
+                }
+            }
+
+            // Upload Templates
+            for (const template of importedData.templates) {
+                const { id, ...templateData } = template; // Remove old local ID
+                try {
+                    await userDocRef.collection('templates').add(templateData);
+                    uploadedTemplates++;
+                } catch (error) {
+                    console.error("Error uploading template:", error);
+                }
+            }
+
+            // Reset UI
+            importBackupBtn.disabled = false;
+            importBackupBtn.textContent = '📥';
+            importBackupFileInput.value = '';
+
+            alert(`✓ Imported ${uploadedEntries} entries and ${uploadedTemplates} templates!`);
+        } catch (err) {
+            console.error("Import error:", err);
+            alert("Error reading file: " + err.message);
+            importBackupBtn.disabled = false;
+            importBackupBtn.textContent = '📥';
+            importBackupFileInput.value = '';
+        }
+    };
+    reader.readAsText(file);
+}
+
 // Helper: Set default date/time to current values
 function setDefaultDateTime() {
     const now = new Date();
@@ -206,6 +281,8 @@ saveTemplateBtn.addEventListener('click', handleSaveTemplate);
 loginBtn.addEventListener('click', handleLogin);
 logoutBtn.addEventListener('click', handleLogout);
 exportBtn.addEventListener('click', exportDataFallback);
+importBackupBtn.addEventListener('click', () => importBackupFileInput.click());
+importBackupFileInput.addEventListener('change', handleImportBackup);
 
 expandAllBtn.addEventListener('click', handleExpandAll);
 collapseAllBtn.addEventListener('click', handleCollapseAll);

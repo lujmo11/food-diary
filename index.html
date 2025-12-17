@@ -29,8 +29,9 @@
                     <div id="user-info" class="hidden" style="display: flex; align-items: center; gap: 10px;">
                         <img id="user-avatar" src="" alt="User" style="width: 32px; height: 32px; border-radius: 50%;">
                         <span id="user-name" style="font-size: 0.9rem; font-weight: 500;"></span>
-                        <button id="logout-btn" class="btn outline" style="font-size: 0.8rem; padding: 4px 8px;">Logout</button>
+                        <button id="import-backup-btn" class="btn outline" style="font-size: 0.8rem; padding: 4px 8px;" title="Import Backup File">📥</button>
                         <button id="export-btn" class="btn secondary" style="font-size: 0.8rem; padding: 4px 8px;" title="Download Backup">⬇</button>
+                        <button id="logout-btn" class="btn outline" style="font-size: 0.8rem; padding: 4px 8px;">Logout</button>
                     </div>
                     <button id="login-btn" class="btn primary">Login with Google</button>
                 </div>
@@ -211,6 +212,7 @@
             </section>
         </main>
     </div>
+    <input type="file" id="import-backup-file" accept=".json" hidden>
     <script src="app.js"></script>
 </body>
 </html>
